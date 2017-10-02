@@ -47,10 +47,29 @@ di "${run}"
 
 * First load data and create unexpected changes to income and consumption
 do ${dofiles}/datacreation
-* asdf
-
+* For now let's use after tax income
+gen delta_log_y = delta_log_y2
+* Run the MPC out of transitory and permanent shocks, with graphs for age
+do ${dofiles}/MPC_age
+* for the rest of the runs we will focus on core working age people
+drop if age<25 | age>60
+* Look at hand-to-mouth results
+do ${dofiles}/Hand_to_mouth
+* Look at the slow response of consumption to permanent income shocks
+do ${dofiles}/Slow_cons_response
 
 log close
+
+
+/*
+* Other code that might be of interest
+
+* Inheritance MPC - this uses the inheritance data so will clear the dataset
+do ${dofiles}/Slow_cons_response
+
+*BPP_method has basically been replace with the individual files run above
+*/
+
 
 
 

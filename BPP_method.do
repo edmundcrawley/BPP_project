@@ -3,51 +3,7 @@
 *
 *
 ****************************************************************************
-set more off, permanently
 
-global production_run = 0
-*global production_run = 1
-
-scalar change_size_drop = 5.0
-*scalar change_size_drop = 2.0
-
-* Get the data
-if $production_run == 1 {
-	global rawdata = "/ssb/stamme01/wealth5/wk48/raw"
-	global savedirectory = "/ssb/stamme01/wealth5/wk48/ecr"
-	global figures = "/ssb/stamme01/wealth5/dok/ecr/figures"
-	use ${savedirectory}/consumption_ecr_sample.dta, clear
-	* I think you may need to merge in b_year. Possibly worth saving this in the data so 
-	* you don't have to repeatedly do this merge
-	merge m:1 lnr using ${rawdata}/constant_traits.dta, keepusing(b_year)
-}
-else {
-	* This loads dummy data for testing
-	global savedirectory = "C:\Users\edmun\OneDrive\Documents\Research\Norway\DummyDataFromSSB"
-	global figures = "C:\Users\edmun\OneDrive\Documents\Research\Norway\DummyDataFromSSB"
-	*use ${savedirectory}/consumption_ecr_dummy.dta, clear
-	use ${savedirectory}/all_children_k2k_dummy.dta, clear
-}
-
-log using ${figures}/log_BPP.log, replace
-tsset
-
-* caculate log changes in income and consumption
-gen log_y = log(inc_at_h)
-gen log_c = log(consumption_h)
-gen delta_log_y = D.log_y
-gen delta_log_c = D.log_c
-*also calculate age
-gen age = year-b_year
-
-*drop large changes in income (more than 500% increase, or 80% decrease as in Kaplan Violante)
-drop if delta_log_y ==.
-drop if delta_log_y > log(change_size_drop)
-drop if delta_log_y < -log(change_size_drop)
-*similarly for consumption
-drop if delta_log_c ==.
-drop if delta_log_c > log(change_size_drop)
-drop if delta_log_c < -log(change_size_drop)
 
 *****************************************************************************
 * MPC out of transitory shocks

@@ -94,6 +94,21 @@ g t_age = year-b_year
 bysort hh_id year: egen age = max(t_age)
 drop t_ 
 
+*fix so code runs when using dummy data
+if $production_run != 1 {
+	replace age = 30
+	replace age = 35 if random_noise>0.1
+	replace age = 40 if random_noise>0.2
+	replace age = 45 if random_noise>0.3
+	replace age = 50 if random_noise>0.4
+	replace age = 55 if random_noise>0.5
+	replace age = 60 if random_noise>0.6
+	replace age = 65 if random_noise>0.7
+	replace age = 70 if random_noise>0.8
+	replace age = 75 if random_noise>0.9
+}
+
+
 bysort hh_id year: g nobs = _n
 *We should possibly replace edlevel with the education level of the male
 *Presently it will be randomly either the education level of the male or female
@@ -204,8 +219,6 @@ g delta_log_c = D.residual_log_consumption
 drop if delta_log_c ==.
 drop if delta_log_c > log(change_size_drop)
 drop if delta_log_c < -log(change_size_drop)
-
-
 
 // SAVE AND CLOSE
 *  ============================================================================
