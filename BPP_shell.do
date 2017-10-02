@@ -17,7 +17,7 @@ global production_run = 0
 *global production_run = 1
 
 *change the name depending on which run/version you're running
-global run = "firstrun"
+global run = "after_tax"
 
 * PATHS
 if $production_run == 1 {
@@ -43,7 +43,7 @@ log using ${logfile}/logBPP_${run}.log, replace
 
 di "${run}"
 
-*********Now run the codes
+*********Now run the codes****************************************************
 
 * First load data and create unexpected changes to income and consumption
 do ${dofiles}/datacreation
@@ -57,6 +57,8 @@ drop if age<25 | age>60
 do ${dofiles}/Hand_to_mouth
 * Look at the slow response of consumption to permanent income shocks
 do ${dofiles}/Slow_cons_response
+
+******************************************************************************
 
 log close
 

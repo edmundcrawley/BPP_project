@@ -112,7 +112,7 @@ if $production_run != 1 {
 bysort hh_id year: g nobs = _n
 *We should possibly replace edlevel with the education level of the male
 *Presently it will be randomly either the education level of the male or female
-replace edlevel = edlevel[2] if nobs != 1 & male!=1
+replace edlevel = edlevel[2] if nobs != 1 & male[2]==1
 drop if nobs != 1
 drop nobs
 
