@@ -35,7 +35,7 @@ graph save ${figures}/age_transitory_${run}.gph, replace
 * MPC out of permanent shocks
 *****************************************************************************
 * This regression estimates the marginal propensity to consume for everyone
-gen instrument = F.delta_log_y + delta_log_y + L2.delta_log_y
+gen instrument = F.delta_log_y + delta_log_y + L.delta_log_y
 ivreg2 delta_log_c (delta_log_y = instrument), robust 
 
 * Do regression for each age group
