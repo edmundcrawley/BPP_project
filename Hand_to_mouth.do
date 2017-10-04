@@ -68,7 +68,7 @@ matrix rown MPC_by_deposit = $tick_labels
 coefplot (matrix(MPC_by_deposit[.,1]), ci((MPC_by_deposit[.,2] MPC_by_deposit[.,3]) )), ///
 vertical recast(line) ciopts(recast(rline) lpattern(dash)) ///
 ytitle(MPC) nooffset xtitle(Deposit Quintile) title(MPC out of Transitory Shocks by Deposits) name(deposit_quintiles_transitory)
-graph save ${figures}/deposit_quintiles_transitory_${run}.gph, replace
+graph save ${figures}/${run}_deposit_quintiles_transitory.gph, replace
 
 *Permanent shocks by deposit
 matrix MPC_by_deposit = J($n_centiles +1,3,.)
@@ -88,7 +88,7 @@ matrix rown MPC_by_deposit = $tick_labels
 coefplot (matrix(MPC_by_deposit[.,1]), ci((MPC_by_deposit[.,2] MPC_by_deposit[.,3]) )), ///
 vertical recast(line) ciopts(recast(rline) lpattern(dash)) ///
 ytitle(MPC) nooffset xtitle(Deposit Quintile) title(MPC out of Permanent Shocks by Deposits) name(deposit_quintiles_permanent)
-graph save ${figures}/deposit_quintiles_permanent_${run}.gph, replace
+graph save ${figures}/${run}_deposit_quintiles_permanent.gph, replace
 
 *Let's see if the MPC to permanent shocks for the top quintile increases over time
 *May need to use the full sample to see this clearly
@@ -114,5 +114,5 @@ matrix rown MPC_habit = $tick_labels
 coefplot (matrix(MPC_habit[.,1]), ci((MPC_habit[.,2] MPC_habit[.,3]) )), ///
 vertical recast(line) ciopts(recast(rline) lpattern(dash)) ///
 ytitle(MPC) nooffset xtitle(Time for Habit Formation) title(Habit Formation: Time from Permanent Shock) name(top_quintile_habits)
-graph save ${figures}/top_quintile_habits_${run}.gph, replace
+graph save ${figures}/${run}_top_quintile_habits.gph, replace
 

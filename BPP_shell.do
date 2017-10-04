@@ -5,12 +5,10 @@
 *
 *****************************************************************************
 
-set more off, permanently
-macro drop _all
-
 clear
+macro drop _all
 graph drop _all
-estimates drop _all
+est drop _all
 set more off, permanently
 
 global production_run = 0
@@ -19,14 +17,17 @@ global production_run = 0
 *change the name depending on which run/version you're running
 global run = "after_tax"
 
+* put you're name here when you're the one running the files
+global name = "hon"
+
 * PATHS
 if $production_run == 1 {
 	global rawdata = "/ssb/stamme01/wealth5/wk48/raw"
 	global savedirectory_edmund = "/ssb/stamme01/wealth5/wk48/ecr"
-	global savedirectory = "/ssb/stamme01/wealth5/wk48/hon"	
-	global figures = "/ssb/stamme01/wealth5/dok/hon/figures"
-	global logfile = "/ssb/stamme01/wealth5/dok/hon"
-	global dofiles = "/ssb/stamme01/wealth5/prog/hon"
+	global savedirectory = "/ssb/stamme01/wealth5/wk48/${name}"	
+	global figures = "/ssb/stamme01/wealth5/dok/${name}/figures"
+	global logfile = "/ssb/stamme01/wealth5/dok/${name}"
+	global dofiles = "/ssb/stamme01/wealth5/prog/${name}"
 }
 else {
 	global rawdata = "C:\Users\edmun\OneDrive\Documents\Research\Norway\DummyDataFromSSB"
@@ -46,9 +47,15 @@ di "${run}"
 *********Now run the codes****************************************************
 
 * First load data and create unexpected changes to income and consumption
-do ${dofiles}/datacreation
+*do ${dofiles}/datacreation
+
+* lets run the datacreation and the analysis separately for now 
+u ${savedirectory}/datacreation_everyone_sample.dta
+
 * For now let's use after tax income
-gen delta_log_y = delta_log_y2
+g log_y = log_y2
+g delta_log_y = delta_log_y2
+
 * Run the MPC out of transitory and permanent shocks, with graphs for age
 do ${dofiles}/MPC_age
 * for the rest of the runs we will focus on core working age people

@@ -28,7 +28,7 @@ matrix rown MPC_by_age = $tick_labels
 coefplot (matrix(MPC_by_age[.,1]), ci((MPC_by_age[.,2] MPC_by_age[.,3]) )), ///
 vertical recast(line) ciopts(recast(rline) lpattern(dash)) ///
 ytitle(MPC) nooffset xtitle(Age) title(MPC out of Transitory Shocks by Age) name(age_transitory)
-graph save ${figures}/age_transitory_${run}.gph, replace
+graph save ${figures}/${run}_age_transitory.gph, replace
 
 
 *****************************************************************************
@@ -62,4 +62,4 @@ matrix rown MPC_by_age = $tick_labels
 coefplot (matrix(MPC_by_age[.,1]), ci((MPC_by_age[.,2] MPC_by_age[.,3]) )), ///
 vertical recast(line) ciopts(recast(rline) lpattern(dash)) ///
 ytitle(MPC) nooffset xtitle(Age) title(MPC out of Permanent Shocks by Age) name(age_permanent)
-graph save ${figures}/age_permanent_${run}.gph, replace
+graph save ${figures}/${run}_age_permanent.gph, replace

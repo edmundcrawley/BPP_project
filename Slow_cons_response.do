@@ -30,7 +30,7 @@ matrix rown MPC_habit = $tick_labels
 coefplot (matrix(MPC_habit[.,1]), ci((MPC_habit[.,2] MPC_habit[.,3]) )), ///
 vertical recast(line) ciopts(recast(rline) lpattern(dash)) ///
 ytitle(MPC) nooffset xtitle(Time for Habit Formation) title(Habit Formation: Time from Permanent Shock) name(habits1)
-graph save ${figures}/habits1_${run}.gph, replace
+graph save ${figures}/${run}_habits1.gph, replace
 
 *repeat but with only those that are in the final sample
 gen long_sample = e(sample)
@@ -63,7 +63,7 @@ matrix rown MPC_habit = $tick_labels
 coefplot (matrix(MPC_habit[.,1]), ci((MPC_habit[.,2] MPC_habit[.,3]) )), ///
 vertical recast(line) ciopts(recast(rline) lpattern(dash)) ///
 ytitle(MPC) nooffset xtitle(Time for Habit Formation) title(Habit Formation: Time from Permanent Shock) name(habits2)
-graph save ${figures}/habits2_${run}.gph, replace
+graph save ${figures}/${run}_habits2.gph, replace
 
 * The number we are calculating is cov(delta_log_c, F.log_y - L`j'.log_y)/cov(delta_log_y, F.log_y - L`j'.log_y)
 * It would be useful to look at those the numerator and denominator separately
@@ -73,5 +73,5 @@ matrix rown cov_dy_djy = $tick_labels
 coefplot (matrix(cov_dc_djy[.,1])) (matrix(cov_dy_djy[.,1]) ), ///
 vertical recast(line)   ///
 ytitle(covariance) nooffset xtitle(Time for Habit Formation) title(Habit Formation: Time from Permanent Shock) name(habits3)
-graph save ${figures}/habits3_${run}.gph, replace
+graph save ${figures}/${run}_habits3.gph, replace
 
