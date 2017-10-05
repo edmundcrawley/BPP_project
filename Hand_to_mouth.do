@@ -94,12 +94,10 @@ graph save ${figures}/${run}_deposit_quintiles_permanent.gph, replace
 *May need to use the full sample to see this clearly
 matrix MPC_habit = J(9,3,.)
 global tick_labels = ""
-cap drop instrument1
-gen instrument1 = F.delta_log_y + delta_log_y
 forvalues j = 2/10 {
 	global jminus1 = `j'-1
 	cap drop instrument`j'
-	gen instrument`j' = instrument${jminus1} + L${jminus1}.delta_log_y
+	gen instrument`j' = F.log_y  + L`j'.log_y
 	quietly ivreg2 delta_log_c (delta_log_y = instrument`j') if deposit_ratio_quintile== 5, robust
 	matrix b = e(b)
 	matrix V = e(V)
@@ -115,4 +113,29 @@ coefplot (matrix(MPC_habit[.,1]), ci((MPC_habit[.,2] MPC_habit[.,3]) )), ///
 vertical recast(line) ciopts(recast(rline) lpattern(dash)) ///
 ytitle(MPC) nooffset xtitle(Time for Habit Formation) title(Habit Formation: Time from Permanent Shock) name(top_quintile_habits)
 graph save ${figures}/${run}_top_quintile_habits.gph, replace
+
+*do the same but only for households who actually remain in the sample
+gen final_sample = e(sample)
+matrix MPC_habit = J(9,3,.)
+global tick_labels = ""
+forvalues j = 2/10 {
+	global jminus1 = `j'-1
+	cap drop instrument`j'
+	gen instrument`j' = F.log_y  + L`j'.log_y
+	quietly ivreg2 delta_log_c (delta_log_y = instrument`j') if final_sample==1, robust
+	matrix b = e(b)
+	matrix V = e(V)
+	matrix MPC_habit[`j'-1,1] = b[1,1], ///
+	b[1,1]-1.96*sqrt(V[1,1]), ///
+	b[1,1]+1.96*sqrt(V[1,1])
+	global tick_labels $tick_labels `j'
+	disp e(N)
+}
+matrix coln MPC_habit = MPC lcb ucb
+matrix rown MPC_habit = $tick_labels
+coefplot (matrix(MPC_habit[.,1]), ci((MPC_habit[.,2] MPC_habit[.,3]) )), ///
+vertical recast(line) ciopts(recast(rline) lpattern(dash)) ///
+ytitle(MPC) nooffset xtitle(Time for Habit Formation) title(Habit Formation: Time from Permanent Shock) name(top_quintile_habits2)
+graph save ${figures}/${run}_top_quintile_habits2.gph, replace
+
 

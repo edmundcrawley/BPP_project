@@ -15,7 +15,7 @@ forvalues i = 1(1) $n_centiles {
 	quietly ivreg2 delta_log_c (delta_log_y = F.delta_log_y) if debt_quintile== `i', robust
 	matrix b = e(b)
 	matrix V = e(V)
-	matrix MPC_by_debt[`i'+1,1] = b[1,1], ///
+	matrix MPC_by_debt[`i',1] = b[1,1], ///
 	b[1,1]-1.96*sqrt(V[1,1]), ///
 	b[1,1]+1.96*sqrt(V[1,1])
 	global tick_labels $tick_labels `i'
@@ -35,7 +35,7 @@ forvalues i = 1(1) $n_centiles {
 	quietly ivreg2 delta_log_c (delta_log_y = instrument) if debt_quintile== `i', robust
 	matrix b = e(b)
 	matrix V = e(V)
-	matrix MPC_by_debt[`i'+1,1] = b[1,1], ///
+	matrix MPC_by_debt[`i',1] = b[1,1], ///
 	b[1,1]-1.96*sqrt(V[1,1]), ///
 	b[1,1]+1.96*sqrt(V[1,1])
 	global tick_labels $tick_labels `i'
@@ -95,14 +95,14 @@ vertical recast(line) ciopts(recast(rline) lpattern(dash)) ///
 ytitle(MPC) nooffset xtitle(Year) title(MPC out of Permanent Shocks by Year) name(year_permanent)
 graph save ${figures}/${run}_year_permanent.gph, replace
 
+if $production_run !=1 {
+	replace real_estate_h = 0 if random_noise>0.94
+}
+
 *Homeowner transitory
 ivreg2 delta_log_c  (delta_log_y = F.delta_log_y) if (real_estate_h>0 & real_estate_h!=.), robust  
 *Non-Homeowner transitory
 ivreg2 delta_log_c  (delta_log_y = F.delta_log_y) if real_estate_h==0, robust 
-
-if $production_run !=1 {
-	replace real_estate_h = 0 if random_noise>0.94
-}
 
 *Homeowner permanent
 ivreg2 delta_log_c  (delta_log_y = instrument) if (real_estate_h>0 & real_estate_h!=.), robust  

@@ -31,16 +31,30 @@ ytitle(MPC) nooffset xtitle(Age) title(MPC out of Transitory Shocks by Age) name
 graph save ${figures}/${run}_age_transitory.gph, replace
 
 * Test different instruments for the transitory shock to see robustness of results
+* Also calulate numerator and denominator separately
+gen F2 = F2.log_y-log_y
+gen F3 = F3.log_y-log_y
+gen F4 = F4.log_y-log_y
+ivreg2 delta_log_c (delta_log_y = F.delta_log_y), robust 
+correlate delta_log_c F.delta_log_y, covariance
+correlate delta_log_y F.delta_log_y, covariance
 ivreg2 delta_log_c (delta_log_y = F2.log_y-log_y), robust 
+correlate delta_log_c F2, covariance
+correlate delta_log_y F2, covariance
 ivreg2 delta_log_c (delta_log_y = F3.log_y-log_y), robust 
+correlate delta_log_c F3, covariance
+correlate delta_log_y F3, covariance
 ivreg2 delta_log_c (delta_log_y = F4.log_y-log_y), robust 
+correlate delta_log_c F4, covariance
+correlate delta_log_y F4, covariance
+drop F2 F3 F4
 
 
 *****************************************************************************
 * MPC out of permanent shocks
 *****************************************************************************
 * This regression estimates the marginal propensity to consume for everyone
-gen instrument = F.delta_log_y + delta_log_y + L.delta_log_y
+gen instrument = F.log_y +  L2.delta_log_y
 ivreg2 delta_log_c (delta_log_y = instrument), robust 
 
 * Do regression for each age group
