@@ -30,6 +30,11 @@ vertical recast(line) ciopts(recast(rline) lpattern(dash)) ///
 ytitle(MPC) nooffset xtitle(Age) title(MPC out of Transitory Shocks by Age) name(age_transitory)
 graph save ${figures}/${run}_age_transitory.gph, replace
 
+* Test different instruments for the transitory shock to see robustness of results
+ivreg2 delta_log_c (delta_log_y = F2.log_y-log_y), robust 
+ivreg2 delta_log_c (delta_log_y = F3.log_y-log_y), robust 
+ivreg2 delta_log_c (delta_log_y = F4.log_y-log_y), robust 
+
 
 *****************************************************************************
 * MPC out of permanent shocks
