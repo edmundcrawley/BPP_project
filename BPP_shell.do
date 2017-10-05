@@ -50,7 +50,7 @@ di "${run}"
 *do ${dofiles}/datacreation
 
 * lets run the datacreation and the analysis separately for now 
-u ${savedirectory}/datacreation_everyone_sample.dta
+u ${savedirectory}/datacreation_everyone_sample.dta, clear
 
 * For now let's use after tax income
 g log_y = log_y2
@@ -64,6 +64,11 @@ drop if age<25 | age>60
 do ${dofiles}/Hand_to_mouth
 * Look at the slow response of consumption to permanent income shocks
 do ${dofiles}/Slow_cons_response
+* Draw path of income and consumption of different quartiles of shocks
+do ${dofiles}/income_cons_paths
+
+* A bunch of further tests of MPC characteristics
+do ${dofiles}/Extra_Tests
 
 ******************************************************************************
 
