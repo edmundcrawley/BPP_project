@@ -84,7 +84,7 @@ forvalue this_run = 1 (1) 4 {
 	gen F2 = F2.log_y-log_y
 	gen F3 = F3.log_y-log_y
 	gen F4 = F4.log_y-log_y
-	ivreg2 L.delta_log_c (L.delta_log_y = F.delta_log_y) if include_these, robust 
+	ivreg2 L.delta_log_c (L.delta_log_y = delta_log_y) if include_these, robust 
 	correlate L.delta_log_c delta_log_y if include_these, covariance
 	correlate L.delta_log_y delta_log_y if include_these, covariance
 	ivreg2 L.delta_log_c (L.delta_log_y = L.F2) if include_these, robust 

@@ -38,13 +38,13 @@ gen F4 = F4.log_y-log_y
 ivreg2 delta_log_c (delta_log_y = F.delta_log_y), robust 
 correlate delta_log_c F.delta_log_y, covariance
 correlate delta_log_y F.delta_log_y, covariance
-ivreg2 delta_log_c (delta_log_y = F2.log_y-log_y), robust 
+ivreg2 delta_log_c (delta_log_y = F2), robust 
 correlate delta_log_c F2, covariance
 correlate delta_log_y F2, covariance
-ivreg2 delta_log_c (delta_log_y = F3.log_y-log_y), robust 
+ivreg2 delta_log_c (delta_log_y = F3), robust 
 correlate delta_log_c F3, covariance
 correlate delta_log_y F3, covariance
-ivreg2 delta_log_c (delta_log_y = F4.log_y-log_y), robust 
+ivreg2 delta_log_c (delta_log_y = F4), robust 
 correlate delta_log_c F4, covariance
 correlate delta_log_y F4, covariance
 drop F2 F3 F4
