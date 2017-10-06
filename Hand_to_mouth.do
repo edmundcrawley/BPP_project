@@ -97,7 +97,7 @@ global tick_labels = ""
 forvalues j = 2/10 {
 	global jminus1 = `j'-1
 	cap drop instrument`j'
-	gen instrument`j' = F.log_y  + L`j'.log_y
+	gen instrument`j' = F.log_y  - L`j'.log_y
 	quietly ivreg2 delta_log_c (delta_log_y = instrument`j') if deposit_ratio_quintile== 5, robust
 	matrix b = e(b)
 	matrix V = e(V)
@@ -121,7 +121,7 @@ global tick_labels = ""
 forvalues j = 2/10 {
 	global jminus1 = `j'-1
 	cap drop instrument`j'
-	gen instrument`j' = F.log_y  + L`j'.log_y
+	gen instrument`j' = F.log_y  - L`j'.log_y
 	quietly ivreg2 delta_log_c (delta_log_y = instrument`j') if final_sample==1, robust
 	matrix b = e(b)
 	matrix V = e(V)
