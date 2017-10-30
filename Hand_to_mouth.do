@@ -36,22 +36,87 @@ if $production_run != 1 {
 }
 
 *Caculate MPC out of transitory shocks for the different groups
+*Print results in a matrix that includes numerator, denominator and standard
+*deviation of income
+matrix MPC_transitory = J(3,5,.)
+matrix coln MPC_transitory = Coeff Numerator Denominator yStdDev cStdDev
+matrix rown MPC_transitory = NonHtm PoorHtm WealthHtm
 *Non hand to mouth
 ivreg2 delta_log_c  (delta_log_y = F.delta_log_y) if hand_to_mouth_status==0, robust  
+matrix MPC_transitory[1,1] = _b[delta_log_y]
+correlate delta_log_c F.delta_log_y if hand_to_mouth_status==0, covariance
+matrix MPC_transitory[1,2] = r(cov_12)
+correlate delta_log_y F.delta_log_y if hand_to_mouth_status==0, covariance
+matrix MPC_transitory[1,3] = r(cov_12)
+correlate delta_log_y delta_log_y if hand_to_mouth_status==0, covariance
+matrix MPC_transitory[1,4] = sqrt(r(Var_1))
+correlate delta_log_c delta_log_c if hand_to_mouth_status==0, covariance
+matrix MPC_transitory[1,5] = sqrt(r(Var_1))
 *Poor hand to mouth
 ivreg2 delta_log_c  (delta_log_y = F.delta_log_y) if hand_to_mouth_status==1, robust  
+matrix MPC_transitory[2,1] = _b[delta_log_y]
+correlate delta_log_c F.delta_log_y if hand_to_mouth_status==1, covariance
+matrix MPC_transitory[2,2] = r(cov_12)
+correlate delta_log_y F.delta_log_y if hand_to_mouth_status==1, covariance
+matrix MPC_transitory[2,3] = r(cov_12)
+correlate delta_log_y delta_log_y if hand_to_mouth_status==1, covariance
+matrix MPC_transitory[2,4] = sqrt(r(Var_1))
+correlate delta_log_c delta_log_c if hand_to_mouth_status==1, covariance
+matrix MPC_transitory[1,5] = sqrt(r(Var_1))
 *Wealthy hand to mouth
 ivreg2 delta_log_c  (delta_log_y = F.delta_log_y) if hand_to_mouth_status==2, robust  
+matrix MPC_transitory[3,1] = _b[delta_log_y]
+correlate delta_log_c F.delta_log_y if hand_to_mouth_status==2, covariance
+matrix MPC_transitory[3,2] = r(cov_12)
+correlate delta_log_y F.delta_log_y if hand_to_mouth_status==2, covariance
+matrix MPC_transitory[3,3] = r(cov_12)
+correlate delta_log_y delta_log_y if hand_to_mouth_status==2, covariance
+matrix MPC_transitory[3,4] = sqrt(r(Var_1))
+correlate delta_log_c delta_log_c if hand_to_mouth_status==2, covariance
+matrix MPC_transitory[1,5] = sqrt(r(Var_1))
+
+matrix list MPC_transitory
 
 
 *Caculate MPC out of permanent shocks for the different groups
+matrix MPC_permanent = J(3,5,.)
+matrix coln MPC_permanent = Coeff Numerator Denominator yStdDev cStdDev
+matrix rown MPC_permanent = NonHtm PoorHtm WealthHtm
 *Non hand to mouth
-ivreg2 delta_log_c  (delta_log_y = instrument) if hand_to_mouth_status==0, robust  
+ivreg2 delta_log_c  (delta_log_y = instrument) if hand_to_mouth_status==0, robust 
+matrix MPC_permanent[1,1] = _b[delta_log_y]
+correlate delta_log_c instrument if hand_to_mouth_status==0, covariance
+matrix MPC_permanent[1,2] = r(cov_12)
+correlate delta_log_y instrument if hand_to_mouth_status==0, covariance
+matrix MPC_permanent[1,3] = r(cov_12)
+correlate delta_log_y delta_log_y if hand_to_mouth_status==0, covariance 
+matrix MPC_permanent[1,4] = sqrt(r(Var_1))
+correlate delta_log_c delta_log_c if hand_to_mouth_status==0, covariance 
+matrix MPC_permanent[1,5] = sqrt(r(Var_1))
 *Poor hand to mouth
-ivreg2 delta_log_c  (delta_log_y = instrument) if hand_to_mouth_status==1, robust  
+ivreg2 delta_log_c  (delta_log_y = instrument) if hand_to_mouth_status==1, robust 
+matrix MPC_permanent[2,1] = _b[delta_log_y]
+correlate delta_log_c instrument if hand_to_mouth_status==1, covariance
+matrix MPC_permanent[2,2] = r(cov_12)
+correlate delta_log_y instrument if hand_to_mouth_status==1, covariance
+matrix MPC_permanent[2,3] = r(cov_12)
+correlate delta_log_y delta_log_y if hand_to_mouth_status==1, covariance 
+matrix MPC_permanent[2,4] = sqrt(r(Var_1))
+correlate delta_log_c delta_log_c if hand_to_mouth_status==1, covariance 
+matrix MPC_permanent[2,5] = sqrt(r(Var_1))
 *Wealthy hand to mouth
 ivreg2 delta_log_c  (delta_log_y = instrument) if hand_to_mouth_status==2, robust  
+matrix MPC_permanent[3,1] = _b[delta_log_y]
+correlate delta_log_c instrument if hand_to_mouth_status==2, covariance
+matrix MPC_permanent[3,2] = r(cov_12)
+correlate delta_log_y instrument if hand_to_mouth_status==2, covariance
+matrix MPC_permanent[3,3] = r(cov_12)
+correlate delta_log_y delta_log_y if hand_to_mouth_status==2, covariance
+matrix MPC_permanent[3,4] = sqrt(r(Var_1))
+correlate delta_log_c delta_log_c if hand_to_mouth_status==2, covariance
+matrix MPC_permanent[3,5] = sqrt(r(Var_1))
 
+matrix list MPC_permanent
 
 * Also distinguish between homeowners and non-homeowners for the wealthy HtM and
 * the unconstrained

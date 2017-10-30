@@ -45,14 +45,14 @@ capture drop homeowner
 g homeowner = realestate_h > 0
 
 *summary statistics of those who have just lost their parents
-tabstat age inc_at_h edlevel deposoits_h debt_h homeowner ///
+tabstat age inc_at_h edlevel deposits_h debt_h homeowner ///
 	if year_since_last_death == 3 & L3.cem_matched==1, ///
 	s(mean sd) //
 	c(s)
 
 * summary statistics of those who are about to loose their parents
-tabstat age inc_at_h edlevel deposoits_h debt_h homeowner ///
-	if year_since_last_death == 1 & L3.cem_matched==1, ///
+tabstat age inc_at_h edlevel deposits_h debt_h homeowner ///
+	if year_since_last_death == -1 & L3.cem_matched==1, ///
 	s(mean sd) //
 	c(s)
 

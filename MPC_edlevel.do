@@ -7,12 +7,38 @@
 tab edlevel
 
 * are there any differences in the permanent shocks?
+matrix MPC_permanent = J(3,4,.)
+matrix coln MPC_permanent = Coeff Numerator Denominator yStdDev
+matrix rown MPC_permanent = NoHS HS HigherEd
 * low education
 ivreg2 delta_log_c  (delta_log_y = instrument) if edlevel == 2, robust
+matrix MPC_permanent[1,1] = _b[delta_log_y]
+correlate delta_log_c instrument if edlevel == 2, covariance
+matrix MPC_permanent[1,2] = r(cov_12)
+correlate delta_log_y instrument if edlevel == 2, covariance
+matrix MPC_permanent[1,3] = r(cov_12)
+correlate delta_log_y delta_log_y if edlevel == 2, covariance
+matrix MPC_permanent[1,4] = sqrt(r(Var_1))
 * high scool educated
 ivreg2 delta_log_c  (delta_log_y = instrument) if edlevel == 3, robust
+matrix MPC_permanent[2,1] = _b[delta_log_y]
+correlate delta_log_c instrument if edlevel == 3, covariance
+matrix MPC_permanent[2,2] = r(cov_12)
+correlate delta_log_y instrument if edlevel == 3, covariance
+matrix MPC_permanent[2,3] = r(cov_12)
+correlate delta_log_y delta_log_y if edlevel == 3, covariance
+matrix MPC_permanent[2,4] = sqrt(r(Var_1))
 * college or higher
 ivreg2 delta_log_c  (delta_log_y = instrument) if edlevel == 7, robust
+matrix MPC_permanent[3,1] = _b[delta_log_y]
+correlate delta_log_c instrument if edlevel == 7, covariance
+matrix MPC_permanent[3,2] = r(cov_12)
+correlate delta_log_y instrument if edlevel == 7, covariance
+matrix MPC_permanent[3,3] = r(cov_12)
+correlate delta_log_y delta_log_y if edlevel == 7, covariance
+matrix MPC_permanent[3,4] = sqrt(r(Var_1))
+
+matrix list MPC_permanent
 
 
 * are there any differences in transitory shocks?

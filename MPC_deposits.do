@@ -13,6 +13,9 @@ replace deposit_ratio_quintile = 0 if deposits_ratio==0
 
 * see average deposits in each quintile
 tabstat deposits_h, by(deposit_ratio_quintile) s(mean)
+* also see average deposits/income in each quintile
+tabstat deposits_ratio, by(deposit_ratio_quintile) s(mean)
+
 
 *make sure code runs on dummy data
 if $production_run != 1 {
@@ -22,6 +25,8 @@ if $production_run != 1 {
 
 *Transitory shocks by deposit
 matrix MPC_by_deposit = J($n_centiles +1,3,.)
+matrix Numerator = J($n_centiles +1,1,.)
+matrix Denominator = J($n_centiles +1,1,.)
 global tick_labels = ""
 forvalues i = 0(1) $n_centiles {
 	quietly ivreg2 delta_log_c (delta_log_y = F.delta_log_y) if deposit_ratio_quintile== `i', robust
@@ -31,6 +36,11 @@ forvalues i = 0(1) $n_centiles {
 	b[1,1]-1.96*sqrt(V[1,1]), ///
 	b[1,1]+1.96*sqrt(V[1,1])
 	global tick_labels $tick_labels `i'
+	*Also calculate numerator and denominator separately
+	quietly correlate delta_log_c F.delta_log_y if  deposit_ratio_quintile== `i', covariance
+	matrix Numerator[`i'+1,1] = r(cov_12)
+	quietly correlate delta_log_y F.delta_log_y if  deposit_ratio_quintile== `i', covariance
+	matrix Denominator[`i'+1,1] = r(cov_12)
 	disp e(N)
 	}
 matrix coln MPC_by_deposit = MPC lcb ucb
@@ -40,8 +50,20 @@ vertical recast(line) ciopts(recast(rline) lpattern(dash)) ///
 ytitle(MPC) nooffset xtitle(Deposit Quintile) title(MPC out of Transitory Shocks by Deposits) name(deposit_quintiles_transitory)
 graph save ${figures}/${run}_deposit_quintiles_transitory.gph, replace
 
+*Also plot numerator and denominator
+coefplot (matrix(Numerator[.,1])) (matrix(Denominator[.,1])) , ///
+vertical recast(line)   ///
+ytitle(Covariance) ///
+ nooffset ///
+ xtitle(Deposit Quintile) ///
+ title(MPC Transitory by Deposits: Numerator and Denominator) ///
+ name(deposit_quintiles_tran_num_den)
+graph save ${figures}/${run}_deposit_quintiles_tran_num_den.gph, replace
+
 *Permanent shocks by deposit
 matrix MPC_by_deposit = J($n_centiles +1,3,.)
+matrix Numerator = J($n_centiles +1,1,.)
+matrix Denominator = J($n_centiles +1,1,.)
 global tick_labels = ""
 forvalues i = 0(1) $n_centiles {
 	quietly ivreg2 delta_log_c (delta_log_y = instrument) if deposit_ratio_quintile== `i', robust
@@ -51,6 +73,11 @@ forvalues i = 0(1) $n_centiles {
 	b[1,1]-1.96*sqrt(V[1,1]), ///
 	b[1,1]+1.96*sqrt(V[1,1])
 	global tick_labels $tick_labels `i'
+	*Also calculate numerator and denominator separately
+	quietly correlate delta_log_c instrument if  deposit_ratio_quintile== `i', covariance
+	matrix Numerator[`i'+1,1] = r(cov_12)
+	quietly correlate delta_log_y instrument if  deposit_ratio_quintile== `i', covariance
+	matrix Denominator[`i'+1,1] = r(cov_12)
 	disp e(N)
 	}
 matrix coln MPC_by_deposit = MPC lcb ucb
@@ -66,21 +93,39 @@ coefplot (matrix(MPC_by_deposit[.,1]), ci((MPC_by_deposit[.,2] MPC_by_deposit[.,
 	name(deposit_quintiles_permanent)
 graph save ${figures}/${run}_deposit_quintiles_permanent.gph, replace
 
+*Also plot numerator and denominator
+coefplot (matrix(Numerator[.,1])) (matrix(Denominator[.,1])) , ///
+vertical recast(line)   ///
+ytitle(Covariance) ///
+nooffset ///
+xtitle(Deposit Quintile) ///
+title(MPC Permanent by Deposits: Numerator and Denominator) ///
+name(deposit_quintiles_perm_num_den)
+graph save ${figures}/${run}_deposit_quintiles_perm_num_den.gph, replace
+
+
 *Let's see if the MPC to permanent shocks for the top quintile increases over time
 *May need to use the full sample to see this clearly
 matrix MPC_habit = J(9,3,.)
+matrix Numerator = J(9,1,.)
+matrix Denominator = J(9,1,.)
 global tick_labels = ""
 forvalues j = 2/10 {
 	global jminus1 = `j'-1
 	cap drop instrument`j'
 	gen instrument`j' = F.log_y  - L`j'.log_y
-	quietly ivreg2 delta_log_c (delta_log_y = instrument`j') if deposit_ratio_quintile== 5 & real_estate_h > 0, robust
+	quietly ivreg2 delta_log_c (delta_log_y = instrument`j') if deposit_ratio_quintile== 5, robust
 	matrix b = e(b)
 	matrix V = e(V)
 	matrix MPC_habit[`j'-1,1] = b[1,1], ///
 	b[1,1]-1.96*sqrt(V[1,1]), ///
 	b[1,1]+1.96*sqrt(V[1,1])
 	global tick_labels $tick_labels `j'
+	*Also calculate numerator and denominator separately
+	quietly correlate delta_log_c instrument`j' if  deposit_ratio_quintile== 5, covariance
+	matrix Numerator[`j'-1,1] = r(cov_12)
+	quietly correlate delta_log_y instrument`j' if  deposit_ratio_quintile== 5, covariance
+	matrix Denominator[`j'-1,1] = r(cov_12)
 	disp e(N)
 }
 matrix coln MPC_habit = MPC lcb ucb
@@ -96,8 +141,21 @@ coefplot (matrix(MPC_habit[.,1]), ci((MPC_habit[.,2] MPC_habit[.,3]) )), ///
 	name(top_quintile_habits)
 graph save ${figures}/${run}_top_quintile_habits.gph, replace
 
+*Also plot numerator and denominator
+coefplot (matrix(Numerator[.,1])) (matrix(Denominator[.,1])) , ///
+vertical recast(line)   ///
+ytitle(Covariance) ///
+nooffset ///
+xtitle(Time for Habit Formation) ///
+title(Habit Formation: Numerator and Denominator) ///
+name(top_quintile_habits_num_den)
+graph save ${figures}/${run}_top_quintile_habits_num_den.gph, replace
+
+
 *do the same but only for households who actually remain in the sample
 gen final_sample = e(sample)
+matrix Numerator = J(9,1,.)
+matrix Denominator = J(9,1,.)
 matrix MPC_habit = J(9,3,.)
 global tick_labels = ""
 forvalues j = 2/10 {
@@ -111,6 +169,11 @@ forvalues j = 2/10 {
 	b[1,1]-1.96*sqrt(V[1,1]), ///
 	b[1,1]+1.96*sqrt(V[1,1])
 	global tick_labels $tick_labels `j'
+	*Also calculate numerator and denominator separately
+	quietly correlate delta_log_c instrument`j' if  final_sample==1, covariance
+	matrix Numerator[`j'-1,1] = r(cov_12)
+	quietly correlate delta_log_y instrument`j' if  final_sample==1, covariance
+	matrix Denominator[`j'-1,1] = r(cov_12)
 	disp e(N)
 }
 matrix coln MPC_habit = MPC lcb ucb
@@ -126,6 +189,16 @@ coefplot (matrix(MPC_habit[.,1]), ci((MPC_habit[.,2] MPC_habit[.,3]) )), ///
 	name(top_quintile_habits2)
 graph save ${figures}/${run}_top_quintile_habits2.gph, replace
 
+*Also plot numerator and denominator
+coefplot (matrix(Numerator[.,1])) (matrix(Denominator[.,1])) , ///
+vertical recast(line)   ///
+ytitle(Covariance) ///
+nooffset ///
+xtitle(Time for Habit Formation) ///
+title(Habit Formation: Numerator and Denominator) ///
+name(top_quintile_habits_num_den2)
+graph save ${figures}/${run}_top_quintile_habits_num_den2.gph, replace
+
 
 *lets see if there is a difference between homeowners and non-homeowners
 
@@ -133,6 +206,16 @@ xtile deposit_ratio_quintile_ho = deposits_ratio if deposits_ratio>0 & real_esta
 replace deposit_ratio_quintile_ho = 0 if deposits_ratio==0
 xtile deposit_ratio_quintile_nohome = deposits_ratio if deposits_ratio>0 & real_estate_h == 0, n($n_centiles )
 replace deposit_ratio_quintile_nohome = 0 if deposits_ratio==0
+
+* see average deposits in each quintile for homeowners
+tabstat deposits_h, by(deposit_ratio_quintile_ho) s(mean)
+* also see average deposits/income in each quintile for homeowners
+tabstat deposits_ratio, by(deposit_ratio_quintile_ho) s(mean)
+
+* see average deposits in each quintile for non-homeowners
+tabstat deposits_h, by(deposit_ratio_quintile_nohome) s(mean)
+* also see average deposits/income in each quintile for non-homeowners
+tabstat deposits_ratio, by(deposit_ratio_quintile_nohome) s(mean)
 
 *Transitory shocks by deposit - HOMEOWNERS
 matrix MPC_by_deposit = J($n_centiles +1,3,.)
