@@ -225,7 +225,7 @@ replace region = 5 if postnr >= 7900
 drop postnr
 
 g homeowner = real_estate_h > 0
-replace homowner = . if real_estate_h == .
+replace homeowner = . if real_estate_h == .
 
 xi, pre(D_) noomit 	i.marital i.edlevel*i.year i.region*i.year ///
 			i.family_size i.b_year i.homeowner*i.year ///
