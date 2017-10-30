@@ -29,21 +29,16 @@ gen instrument = F.log_y -  L2.log_y
 * very simple regressions of change from year 2-3 after parents death
 
 * transitory shocks
-ivreg2 delta_log_c (delta_log_y = F.delta_log_y) if year_since_last_death==3, robust
-
-
+ivreg2 delta_log_c (delta_log_y = F.delta_log_y) if year_since_last_death==3 & L3.cem_matched==1, robust
 * permanent shocks
-ivreg2 delta_log_c (delta_log_y = instrument) if year_since_last_death==3, robust
+ivreg2 delta_log_c (delta_log_y = instrument) if year_since_last_death==3 & L3.cem_matched==1, robust
 
 
 * compare with those who are about to lose their parents
-
 * transitory shocks
-ivreg2 delta_log_c (delta_log_y = F.delta_log_y) if year_since_last_death==-1, robust
-
-
+ivreg2 delta_log_c (delta_log_y = F.delta_log_y) if year_since_last_death==-1 & L3.cem_matched==1, robust
 * permanent shocks
-ivreg2 delta_log_c (delta_log_y = instrument) if year_since_last_death==-1, robust
+ivreg2 delta_log_c (delta_log_y = instrument) if year_since_last_death==-1 & L3.cem_matched==1, robust
 
 * who are these people?
 capture drop homeowner
@@ -51,58 +46,41 @@ g homeowner = realestate_h > 0
 
 *summary statistics of those who have just lost their parents
 tabstat age inc_at_h edlevel deposoits_h debt_h homeowner ///
-	if year_since_last_death == 3, ///
+	if year_since_last_death == 3 & L3.cem_matched==1, ///
 	s(mean sd) //
 	c(s)
 
 * summary statistics of those who are about to loose their parents
 tabstat age inc_at_h edlevel deposoits_h debt_h homeowner ///
-	if year_since_last_death == 1, ///
+	if year_since_last_death == 1 & L3.cem_matched==1, ///
 	s(mean sd) //
 	c(s)
-	
 
-	
+* Do regression that compares the two groups statistically
+gen treatment = year_since_last_death==3 & L3.cem_matched==1
+gen delta_log_y_treatment = treatment*delta_log_y
+gen Fdelta_log_y_treatment = treatment*F.delta_log_y
+gen instrument_treatment = treatment*instrument
+* transitory shocks
+ivreg2 delta_log_c treatment (delta_log_y delta_log_y_treatment = F.delta_log_y Fdelta_log_y_treatment) if L3.cem_matched==1, robust
+* permanent shocks
+ivreg2 delta_log_c treatment (delta_log_y delta_log_y_treatment = instrument instrument_treatment) if L3.cem_matched==1, robust
 
-*Transitory shocks
-global lags = 5
-global leads = 6
-matrix MPC_by_inheritance_year = J($lags + $leads +1,3,.)
-global tick_labels = ""
-forvalues i= -$lags (1) $leads  {
-	quietly ivreg2 delta_log_c (delta_log_y = F.delta_log_y) if year_since_last_death==`i', robust
-	matrix b = e(b)
-	matrix V = e(V)
-	matrix MPC_by_inheritance_year[`i'+$lags +1,1] = b[1,1], ///
-	b[1,1]-1.96*sqrt(V[1,1]), ///
-	b[1,1]+1.96*sqrt(V[1,1])
-	global tick_labels $tick_labels `i'
-	disp e(N)
-}
-matrix coln MPC_by_inheritance_year = MPC lcb ucb
-matrix rown MPC_by_inheritance_year = $tick_labels
-coefplot (matrix(MPC_by_inheritance_year[.,1]), ci((MPC_by_inheritance_year[.,2] MPC_by_inheritance_year[.,3]) )), ///
-vertical recast(line) ciopts(recast(rline) lpattern(dash)) ///
-ytitle(MPC) nooffset xtitle(Year Since Death) title(MPC out of Transitory Shocks) name(inheritance_transitory)
-graph save ${figures}/inheritance_transitory.gph, replace
+* Look at numerator and denominator
+*transitory numerator
+correlate delta_log_c F.delta_log_y  if L3.cem_matched==1 & treatment==1, covariance
+correlate delta_log_c F.delta_log_y  if L3.cem_matched==1 & treatment==0, covariance
+*transitory denominator
+correlate delta_log_y F.delta_log_y  if L3.cem_matched==1 & treatment==1, covariance
+correlate delta_log_y F.delta_log_y  if L3.cem_matched==1 & treatment==0, covariance
 
-*Permanent shocks
-gen instrument = F.log_y - L2.log_y
-matrix MPC_by_inheritance_year = J($lags + $leads +1,3,.)
-global tick_labels = ""
-forvalues i= -$lags (1) $leads  {
-	quietly ivreg2 delta_log_c (delta_log_y = instrument) if year_since_last_death==`i', robust
-	matrix b = e(b)
-	matrix V = e(V)
-	matrix MPC_by_inheritance_year[`i'+$lags +1,1] = b[1,1], ///
-	b[1,1]-1.96*sqrt(V[1,1]), ///
-	b[1,1]+1.96*sqrt(V[1,1])
-	global tick_labels $tick_labels `i'
-	disp e(N)
-}
-matrix coln MPC_by_inheritance_year = MPC lcb ucb
-matrix rown MPC_by_inheritance_year = $tick_labels
-coefplot (matrix(MPC_by_inheritance_year[.,1]), ci((MPC_by_inheritance_year[.,2] MPC_by_inheritance_year[.,3]) )), ///
-vertical recast(line) ciopts(recast(rline) lpattern(dash)) ///
-ytitle(MPC) nooffset xtitle(Year Since Death) title(MPC out of Permanent Shocks) name(inheritance_permanent)
-graph save ${figures}/inheritance_permanent.gph, replace
+*permanent numerator
+correlate delta_log_c instrument  if L3.cem_matched==1 & treatment==1, covariance
+correlate delta_log_c instrument  if L3.cem_matched==1 & treatment==0, covariance
+*permanent denominator
+correlate delta_log_y instrument  if L3.cem_matched==1 & treatment==1, covariance
+correlate delta_log_y instrument  if L3.cem_matched==1 & treatment==0, covariance
+
+
+
+
