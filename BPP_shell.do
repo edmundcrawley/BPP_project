@@ -5,14 +5,17 @@
 *
 *****************************************************************************
 
+
 clear
 macro drop _all
 graph drop _all
 est drop _all
 set more off, permanently
 
-global production_run = 0
-*global production_run = 1
+set scheme s1color, permanent
+
+*global production_run = 0
+global production_run = 1
 
 *change the name depending on which run/version you're running
 global run = "after_tax"
@@ -44,31 +47,52 @@ log using ${logfile}/logBPP_${run}.log, replace
 
 di "${run}"
 
-*********Now run the codes****************************************************
+
+*********Read data and choose variables and instruments************************
 
 * First load data and create unexpected changes to income and consumption
-*do ${dofiles}/datacreation
+do ${dofiles}/datacreation
 
 * lets run the datacreation and the analysis separately for now 
-u ${savedirectory}/datacreation_everyone_sample.dta, clear
-
+*u ${savedirectory}/datacreation_everyone_sample.dta, clear
+ 
 * For now let's use after tax income
 g log_y = log_y2
 g delta_log_y = delta_log_y2
 
-* Run the MPC out of transitory and permanent shocks, with graphs for age
+* Define instrument
+gen instrument = F.log_y -  L2.log_y
+
+
+
+***********Overall regressions*************************************************
+
+do ${dofiles}/MPC_overall
+
+
+***********Now do the interesting stuff****************************************
+
+* age graphs
 do ${dofiles}/MPC_age
 * for the rest of the runs we will focus on core working age people
-drop if age<25 | age>60
+drop if age<25 | age>62
 * Look at hand-to-mouth results
 do ${dofiles}/Hand_to_mouth
+* deposites
+do ${dofiles}/MPC_deposits
+*debt
+do ${dofiles}/MPC_debt
 * Look at the slow response of consumption to permanent income shocks
 do ${dofiles}/Slow_cons_response
 * Draw path of income and consumption of different quartiles of shocks
 do ${dofiles}/income_cons_paths
 
 * A bunch of further tests of MPC characteristics
-do ${dofiles}/Extra_Tests
+*do ${dofiles}/Extra_tests
+*do ${dofiles}/MPC_edlevel
+*do ${dofiles}/extra_tests_by_no_of_aduls
+
+* All the extra tests for singles/couples
 
 ******************************************************************************
 
@@ -79,7 +103,6 @@ log close
 * Other code that might be of interest
 
 * Inheritance MPC - this uses the inheritance data so will clear the dataset
-do ${dofiles}/Slow_cons_response
 
 *BPP_method has basically been replace with the individual files run above
 */

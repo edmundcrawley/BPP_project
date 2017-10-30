@@ -30,7 +30,7 @@ global first_time = 1
 global name = "hon"
 
 * name of the run
-global run = "run1"
+global run = "full_sample"
 
 // PATHS
 *  ============================================================================
@@ -64,11 +64,11 @@ log using ${logfile}/datacreation_${run}.log, replace
 if $first_time == 1 {
 
 if $production_run == 1 {
-	use ${savedirectory_edmund}/consumption_ecr_sample.dta, clear
+	use ${savedirectory_edmund}/consumption_ecr.dta, clear
 
 	keep b_year *_h hh_id lnr year
 
-	*merge m:1 lnr using ${rawdata}/constant_traits.dta, keep(match merge) keepusing( b_year male im_cat first_stay_year) nogenerate
+	merge m:1 lnr using ${rawdata}/constant_traits.dta, keep(match merge) keepusing(b_year) nogenerate
 	merge m:1 lnr using ${rawdata}/education_nus2000.dta, ///
 		keep(match master) keepusing(edlevel) nogenerate
 	merge 1:1 lnr year using ${rawdata}/marital_cohabit_93_14.dta, ///
@@ -77,9 +77,9 @@ if $production_run == 1 {
 		keep(match master) keepusing(postnr) nogenerate
 	merge 1:1 lnr year using ${savedirectory}/children.dta, ///
 		keep(match master) keepusing(children_u18) 
-	replace children_u18 = 0 if children u18 = .
+	replace children_u18 = 0 if children_u18 == .
 
-	save ${savedirectory}/datacreation_merged_sample.dta, replace
+	save ${savedirectory}/datacreation_merged.dta, replace
 }
 else {
 	use ${savedirectory_edmund}/consumption_ecr_dummy.dta, clear
@@ -224,8 +224,12 @@ replace region = 4 if (postnr>= 7000 & postnr < 7900) // Trøndelag
 replace region = 5 if postnr >= 7900 
 drop postnr
 
+g homeowner = real_estate_h > 0
+replace homowner = . if real_estate_h == .
+
 xi, pre(D_) noomit 	i.marital i.edlevel*i.year i.region*i.year ///
-			i.family_size i.b_year
+			i.family_size i.b_year i.homeowner*i.year ///
+			i.homeowner*i.region
 
 
 
@@ -289,7 +293,7 @@ drop p995 p005 non_extreme
 // SAVE AND CLOSE
 *  ============================================================================
 
-save ${savedirectory}/datacreation_everyone_sample.dta, replace
+save ${savedirectory}/datacreation_everyone.dta, replace
 
 log close
 

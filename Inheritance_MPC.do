@@ -3,7 +3,7 @@
 *******************************************************************************
 
 if $production_run == 1 {
-	use ${savedirectory}/all_children_k2k_4yearsalary.dta, clear
+	use ${savedirectory_edmund}/all_children_k2k_4yearsalary.dta, clear
 }
 else {
 	use ${savedirectory}/all_children_k2k_dummy.dta, clear
@@ -13,20 +13,56 @@ gen year_of_death_1 = year if death_indicator==1
 by lnr: egen year_of_death = mean(year_of_death_1)
 gen year_since_last_death = year - year_of_death
 drop year_of_death year_of_death_1
-* caculate log changes in income and consumption
-gen log_y = log(inc_at_h)
-gen log_c = log(consumption_h)
-gen delta_log_y = D.log_y
-gen delta_log_c = D.log_c
 
-*drop large changes in income (more than 500% increase, or 80% decrease as in Kaplan Violante)
-drop if delta_log_y ==.
-drop if delta_log_y > log(change_size_drop)
-drop if delta_log_y < -log(change_size_drop)
-*similarly for consumption
-drop if delta_log_c ==.
-drop if delta_log_c > log(change_size_drop)
-drop if delta_log_c < -log(change_size_drop)
+* get log changes in income and consumption
+
+merge 1:1 lnr year using ${savedirectory}/datacreation_everyone.dta, ///
+	keep(match master) nogenerate keepusing(delta_log_y2 delta_log_c log_y2 log_c)
+	
+g log_y = log_y2
+g delta_log_y = delta_log_y2
+
+* Define instrument
+gen instrument = F.log_y -  L2.log_y
+
+
+* very simple regressions of change from year 2-3 after parents death
+
+* transitory shocks
+ivreg2 delta_log_c (delta_log_y = F.delta_log_y) if year_since_last_death==3, robust
+
+
+* permanent shocks
+ivreg2 delta_log_c (delta_log_y = instrument) if year_since_last_death==3, robust
+
+
+* compare with those who are about to lose their parents
+
+* transitory shocks
+ivreg2 delta_log_c (delta_log_y = F.delta_log_y) if year_since_last_death==-1, robust
+
+
+* permanent shocks
+ivreg2 delta_log_c (delta_log_y = instrument) if year_since_last_death==-1, robust
+
+* who are these people?
+capture drop homeowner
+g homeowner = realestate_h > 0
+
+*summary statistics of those who have just lost their parents
+tabstat age inc_at_h edlevel deposoits_h debt_h homeowner ///
+	if year_since_last_death == 3, ///
+	s(mean sd) //
+	c(s)
+
+* summary statistics of those who are about to loose their parents
+tabstat age inc_at_h edlevel deposoits_h debt_h homeowner ///
+	if year_since_last_death == 1, ///
+	s(mean sd) //
+	c(s)
+	
+
+	
 
 *Transitory shocks
 global lags = 5
