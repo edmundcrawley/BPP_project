@@ -80,23 +80,6 @@ forvalue this_run = 1 (1) 4 {
 	}
 	*check MPC out of transitory shocks for this sample
 	ivreg2 L.delta_log_c (L.delta_log_y = delta_log_y) if include_these, robust 
-	*see what is going on with different instruments
-	gen F2 = F2.log_y-log_y
-	gen F3 = F3.log_y-log_y
-	gen F4 = F4.log_y-log_y
-	ivreg2 L.delta_log_c (L.delta_log_y = F.delta_log_y) if include_these, robust 
-	correlate L.delta_log_c delta_log_y if include_these, covariance
-	correlate L.delta_log_y delta_log_y if include_these, covariance
-	ivreg2 L.delta_log_c (L.delta_log_y = L.F2) if include_these, robust 
-	correlate L.delta_log_c L.F2 if include_these, covariance
-	correlate L.delta_log_y L.F2 if include_these, covariance
-	ivreg2 L.delta_log_c (L.delta_log_y = L.F3) if include_these, robust 
-	correlate L.delta_log_c L.F3 if include_these, covariance
-	correlate L.delta_log_y L.F3 if include_these, covariance
-	ivreg2 L.delta_log_c (L.delta_log_y = L.F4) if include_these, robust 
-	correlate L.delta_log_c L.F4 if include_these, covariance
-	correlate L.delta_log_y L.F4 if include_these, covariance
-	drop F2 F3 F4
 	
 	*check MPC out of permanent shocks for this sample
 	ivreg2 delta_log_c (delta_log_y = instrument) if include_these, robust 
