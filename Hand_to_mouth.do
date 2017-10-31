@@ -62,7 +62,7 @@ matrix MPC_transitory[2,3] = r(cov_12)
 correlate delta_log_y delta_log_y if hand_to_mouth_status==1, covariance
 matrix MPC_transitory[2,4] = sqrt(r(Var_1))
 correlate delta_log_c delta_log_c if hand_to_mouth_status==1, covariance
-matrix MPC_transitory[1,5] = sqrt(r(Var_1))
+matrix MPC_transitory[2,5] = sqrt(r(Var_1))
 *Wealthy hand to mouth
 ivreg2 delta_log_c  (delta_log_y = F.delta_log_y) if hand_to_mouth_status==2, robust  
 matrix MPC_transitory[3,1] = _b[delta_log_y]
@@ -73,7 +73,7 @@ matrix MPC_transitory[3,3] = r(cov_12)
 correlate delta_log_y delta_log_y if hand_to_mouth_status==2, covariance
 matrix MPC_transitory[3,4] = sqrt(r(Var_1))
 correlate delta_log_c delta_log_c if hand_to_mouth_status==2, covariance
-matrix MPC_transitory[1,5] = sqrt(r(Var_1))
+matrix MPC_transitory[3,5] = sqrt(r(Var_1))
 
 matrix list MPC_transitory
 
