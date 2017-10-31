@@ -89,12 +89,14 @@ do ${dofiles}/income_cons_paths
 
 * A bunch of further tests of MPC characteristics
 *do ${dofiles}/Extra_tests
-*do ${dofiles}/MPC_edlevel
+do ${dofiles}/MPC_edlevel
 *do ${dofiles}/extra_tests_by_no_of_aduls
 
 * All the extra tests for singles/couples
 
 ******************************************************************************
+
+do ${dofiles}/Inheritance_MPC.do
 
 log close
 
